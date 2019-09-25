@@ -21,7 +21,6 @@ When called with the virtualenv in place and functional, libvirt-inventory will 
 
 #### A quick peek at the environment
 ```
- nb  james  ~  Projects  libvirt-inventory   master 
 $ ll
 total 6.7M
 drwxrwxr-x.  4 james james  174 Sep 25 17:26 ./
@@ -35,7 +34,7 @@ drwxrwxr-x.  7 james james  119 Sep 25 17:24 .git/
 -rw-rw----.  1 james james   24 Sep 25 14:29 requirements.txt
 -rw-rw-r--.  1 james james 6.7M Sep 25 17:24 tags
 drwxrwxr-x.  5 james james   56 Sep 25 13:21 venv/
- nb  james  ~  Projects  libvirt-inventory   master 
+
 $ cat libvirt.ini
 [group_rhel]
 add_hosts = rhel*
@@ -47,7 +46,7 @@ ansible_become_password = 1qaz2wsx!QAZ@WSX
 [group_ubuntu]
 add_hosts = ubuntu*
 ansible_become_password = password
- nb  james  ~  Projects  libvirt-inventory   master 
+
 $ sudo virsh list
  Id   Name          State
 -----------------------------
@@ -59,7 +58,6 @@ $ sudo virsh list
 
 #### A look at native script output
 ```
- nb  james  ~  Projects  libvirt-inventory   master 
 $ ./libvirt-inventory.py --list
 {
     "_meta": {
@@ -125,7 +123,7 @@ $ ./libvirt-inventory.py --list
         }
     }
 }
- nb  james  ~  Projects  libvirt-inventory   master 
+
 $ ./libvirt-inventory.py --host rhel8.0
 {
     "ansible_ssh_host": "192.168.122.9"
@@ -134,7 +132,6 @@ $ ./libvirt-inventory.py --host rhel8.0
 
 #### Most importantly, use of the inventory with Ansible
 ```
- nb  james  ~  Projects  libvirt-inventory   master 
 $ ansible -i ./libvirt-inventory.py rhel -m ping
 rhel8.0 | SUCCESS => {
     "ansible_facts": {
