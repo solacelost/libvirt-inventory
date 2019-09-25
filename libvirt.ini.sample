@@ -1,0 +1,76 @@
+# General section controls overall behavior
+[general]
+
+    # Change the defaults here if you like, can be omitted
+    libvirt_connection = qemu:///system
+    libvirt_dhcp_lease_file = /var/lib/libvirt/dnsmasq/virbr0.status
+
+    # Note: you may also use something like:
+    # libvirt_connection = qemu+ssh://root@hypervisor/system
+    # libvirt_dhcp_lease_file = root@hypervisor:/var/lib/libvirt/dnsmasq/virbr0.status
+
+
+# All other sections are either for groups or hosts
+
+
+# The default group for all identified hosts is "libvirt_guests", it will be
+# created automatically but you can define vars to apply to it
+[group_libvirt_guests]
+
+    # You can define normal ansible variables for groups
+    ansible_ssh_private_key_file = /home/james/.ssh/id_rsa
+    ansible_user = james
+    ansible_become_pass = password
+    ansible_python_interpreter = auto_legacy_silent
+
+    # You can add arbitrary vars as well
+    specific_variable = whatever
+
+
+# You can define groups yourself by creating a section for them
+[group_clearlinux]
+
+    # And add hosts to them, even supporting glob-style patterns
+    add_hosts = clear*
+
+    # As well as define arbitrary vars, like above
+    arbitary_variable = important
+
+
+[group_rhel]
+    add_hosts = rhel_server_1,rhel_server_2
+
+
+[group_cent]
+    add_hosts = cent_server_*
+
+
+# Groups are created just by making a section for them, even if the section is
+# empty
+[group_extra_group]
+
+
+# You can also define groups that are parents to other groups
+[group_extra_group_2]
+    # just add the child groups, comma delimited, with _no globbing_, like so
+    add_children = rhel,cent
+
+
+# Hosts are named for the libvirt domain, but connected to via IP directly, so
+# if you use a local .ssh/config to control ssh keys do them by IP.
+
+# If you want to add vars to a host that you think will be discovered, do so in
+# a section named for the host by libvirt domain
+[host_clear]
+
+    # you can add hosts to a group here, too
+    add_groups = extra_group*
+
+    # If there isn't a lease in the DHCP table but you know the IP, you can put
+    # it here... this could come in useful if you're mixing dynamic and static
+    # IPs and you want one ini file to control grouping/variables
+    ansible_ssh_host = ip.address.if.static
+
+    # Arbitrary vars are again supported
+    one_vm_specific_variable = value
+
