@@ -282,7 +282,14 @@ if __name__ == '__main__':
                 logger.debug(
                     'Adding var {} value {}'.format(var, hosts[host][var])
                 )
-                inventory['_meta']['hostvars'][host][var] = hosts[host][var]
+                try:
+                    inventory['_meta']['hostvars'][host][var] = \
+                        hosts[host][var]
+                except KeyError:
+                    logger.warning((
+                        "Unable to add var {} to host {} "
+                        "(doesn't exist?)".format(var, host)
+                    ))
 
     if args.list:
         print(json.dumps(inventory, indent=4))
