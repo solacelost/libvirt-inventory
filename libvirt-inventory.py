@@ -54,6 +54,17 @@ def list_vms(connection: str = None) -> list:
         return conn.listAllDomains()
 
 
+def decode_lease(line: str = None) -> dict:
+    """
+    Reads the default dnsmasq leases file format, in lieu of libvirt's json
+    """
+    line = line.split()
+    return {
+        'mac-address': line[1],
+        'ip-address': line[2],
+    }
+
+
 def list_leases(lease_file: str = None) -> dict:
     """
     Just reads the json from file and returns it as a dict
@@ -101,10 +112,16 @@ def list_leases(lease_file: str = None) -> dict:
         logger.debug(stdout)
         logger.debug('         stderr:')
         logger.debug(stderr)
-        return json.loads(stdout)
+        try:
+            return json.loads(stdout)
+        except json.decoder.JSONDecodeError:
+            return [decode_lease(line) for line in stdout.split('\n')]
 
     with open(lease_file, 'r') as f:
-        return json.load(f)
+        try:
+            return json.load(f)
+        except json.decoder.JSONDecodeError:
+            return [decode_lease(line) for line in f.readlines()]
 
 
 def mac_from_vm(vm: libvirt.virDomain = None) -> str:
