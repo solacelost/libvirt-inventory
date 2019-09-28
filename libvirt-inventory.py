@@ -58,11 +58,13 @@ def decode_lease(line: str = None) -> dict:
     """
     Reads the default dnsmasq leases file format, in lieu of libvirt's json
     """
-    line = line.split()
-    return {
-        'mac-address': line[1],
-        'ip-address': line[2],
-    }
+    if line is not None:
+        logger.debug('Decoding non-JSON lease line: {}'.format(line))
+        line = line.strip().split()
+        return {
+            'mac-address': line[1],
+            'ip-address': line[2],
+        }
 
 
 def list_leases(lease_file: str = None) -> dict:
@@ -71,6 +73,7 @@ def list_leases(lease_file: str = None) -> dict:
 
     Connects to remote host to get file if necessary
     """
+    logger.debug('Reading leases from file: {}'.format(lease_file))
     if ':' in lease_file:
         import paramiko
 
@@ -118,9 +121,12 @@ def list_leases(lease_file: str = None) -> dict:
             return [decode_lease(line) for line in stdout.split('\n')]
 
     with open(lease_file, 'r') as f:
+        logger.debug('Lease file appears to be local, attempting to read JSON')
         try:
             return json.load(f)
         except json.decoder.JSONDecodeError:
+            logger.debug('Non-JSON formatted lease found, parsing')
+            f.seek(0)
             return [decode_lease(line) for line in f.readlines()]
 
 
@@ -133,11 +139,12 @@ def mac_from_vm(vm: libvirt.virDomain = None) -> str:
     return interfaces[0].getAttribute('address')
 
 
-def leases_to_ip(leases: dict = None, mac: str = None) -> str:
+def leases_to_ip(leases: list = None, mac: str = None) -> str:
     """
     Returns the IP assigned to the mac address from the dnsmasq leases file
     """
     for lease in leases:
+        logger.debug('Checking for MAC {} in {}'.format(mac, lease))
         if lease['mac-address'] == mac:
             return lease['ip-address']
 
@@ -259,6 +266,9 @@ if __name__ == '__main__':
 
     vms = list_vms(config['general']['libvirt_connection'])
     leases = list_leases(config['general']['libvirt_dhcp_lease_file'])
+
+    logger.debug('VMs: {}'.format(vms))
+    logger.debug('Leases: {}'.format(leases))
 
     for vm in vms:
         ip = None
